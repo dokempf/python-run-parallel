@@ -20,15 +20,22 @@ relaxations = [0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.175, 0.18, 0.19, 0.2, 0.21,
 # order in which they appear as command line arguments to above
 # executable.
 parameters = [lambdas, mus, resistances, alphas, storages, timesteps, relaxations]
-
+param_names = [(5, "time"), (1, "mu"), (0, "lambda"), (3, "alpha"), (2, "resistance"), (4, "storage"), (6, "relax")]
 
 # The function that executes a single run. This can also handle
 # creation of a suitable working directory, log redirection,
 # setting of environment variables etc.
 def run_simulation(args):
+    # Create working directory
+    dirname = "".join(name + str(args[i]) for i, name in param_names)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
     # Actually run with subprocess
     result = subprocess.run(
-        (executable,) + tuple(str(x) for x in args), capture_output=False
+        (executable,) + tuple(str(a) for a in args),
+        capture_output=False,
+        cwd=os.path.join(os.getcwd(), dirname)
     )
 
     # Produce an error if the return code was not 0
